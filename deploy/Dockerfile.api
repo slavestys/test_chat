@@ -1,0 +1,6 @@
+FROM python:3.13 AS build
+WORKDIR /chat
+COPY api/requirements .
+RUN pip install -r base.txt
+COPY api .
+CMD ["gunicorn", "main:app", "-w", "4", "-k", "uvicorn_worker.UvicornWorker", "--bind", "0.0.0.0:80"]

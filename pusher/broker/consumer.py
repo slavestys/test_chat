@@ -1,5 +1,6 @@
 import asyncio
 from aiokafka import AIOKafkaConsumer
+from aiokafka.errors import KafkaConnectionError
 import json
 
 from observer import event_observer
@@ -15,7 +16,13 @@ class BrokerConsumer:
 
     async def __aenter__(self):
         self._consumer = AIOKafkaConsumer(*self.topics, bootstrap_servers=self.broker_url)
-        await self._consumer.start()
+        while True:
+            try:
+                await self._consumer.start()
+            except KafkaConnectionError:
+                await asyncio.sleep(1)
+            else:
+                break
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):

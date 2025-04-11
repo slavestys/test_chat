@@ -1,6 +1,8 @@
+import asyncio
 import json
 
 from aiokafka import AIOKafkaProducer
+from aiokafka.errors import KafkaConnectionError
 
 import settings
 
@@ -10,7 +12,13 @@ class BrokerProducer:
 
     async def __aenter__(self):
         self._producer = AIOKafkaProducer(bootstrap_servers=settings.BROKER_URL)
-        await self._producer.start()
+        while True:
+            try:
+                await self._producer.start()
+            except KafkaConnectionError:
+                await asyncio.sleep(1)
+            else:
+                break
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):

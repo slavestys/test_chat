@@ -1,0 +1,6 @@
+FROM python:3.13 AS build
+WORKDIR /chat
+COPY pusher/requirements .
+RUN pip install -r base.txt
+COPY pusher .
+CMD ["python", "main.py"]
